@@ -1,8 +1,9 @@
 # DNS Client - ECSE316
 
-A simple DNS client implemented in Java for **ECSE 316 Assignment 1 (Fall 2025)**.  
-The client constructs DNS query packets, sends them via UDP, and parses responses for A, MX, and NS records.  
-No external libraries are used.
+A simple DNS client implemented in Java for **ECSE 316 Assignment 1 (Fall 2025)**.
+The client constructs DNS query packets, sends them via UDP, and parses responses for A, MX, and NS records.
+
+Implemented by: **Mathis Bélanger (261049961) & Tarek Namani ()**
 
 ## Usage
 
