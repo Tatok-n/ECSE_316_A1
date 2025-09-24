@@ -35,7 +35,7 @@ public class DnsSocket {
     /**
      * Send and receive with timeout + retry logic
      */
-    public byte[] queryWithRetry(byte[] queryPacket) throws Exception {
+    public byte[] query(byte[] queryPacket) throws Exception {
         int attempts = 0;
         while (attempts < maxRetries) {
             try {
