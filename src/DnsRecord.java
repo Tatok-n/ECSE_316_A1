@@ -29,6 +29,18 @@ public class DnsRecord {
         this.ARCOUNT = arCount;
     }
 
+    public int getNumberOfAnswers() {
+        return ANCOUNT;
+    }
+
+    public int getNumberOfAdditionalRecords() {
+        return ARCOUNT;
+    }
+
+    public boolean isAuth() {
+        return opCode.AA;
+    }
+
     public void addQuestion(List<DnsLabel> labels, DnsQueryType type, int qClass) {
         DnsQuestion question = new DnsQuestion(labels, type, qClass);
         questions.add(question);
@@ -37,6 +49,10 @@ public class DnsRecord {
     public void addAnswer(List<DnsLabel> name, DnsQueryType type, int classParam, long ttl, int rdLength, RData rData) {
         DnsAnswer answer = new DnsAnswer(name, type, classParam, ttl, rdLength, rData);
         answers.add(answer);
+    }
+
+    public List<DnsAnswer> getAnswers() {
+        return answers;
     }
 
 }

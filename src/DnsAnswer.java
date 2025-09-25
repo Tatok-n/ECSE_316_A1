@@ -17,4 +17,55 @@ public class DnsAnswer {
         this.RDLENGTH = rdLength;
         this.rData = rData;
     }
+
+    public String toString(boolean auth) {
+        StringBuilder sb = new StringBuilder();
+        String domainName = NAME.stream()
+                .map(label -> label.name)
+                .reduce((a, b) -> a + "." + b)
+                .orElse("");
+
+        String authFlag = auth ? "nonauth" : "auth";
+
+        switch (TYPE) {
+            case A:
+
+                sb.append("IP\t")
+                        .append(rData.getRdata()).append("\t")
+                        .append(TTL).append("\t")
+                        .append(authFlag);
+                break;
+
+            case CName:
+
+                sb.append("CNAME\t")
+                        .append(rData.getRdata()).append("\t")
+                        .append(TTL).append("\t")
+                        .append(authFlag);
+                break;
+
+            case MX:
+                MXRdata mx = (MXRdata) rData;
+                String alias = String.join(".",mx.exchange.stream().map(label -> label.name).toList());
+                int pref = mx.preference;
+                sb.append("MX\t").append(alias).append("\t").append(pref).append("\t").append(TTL).append("\t").append(authFlag);
+                break;
+
+            case NS:
+                DomainRdata domain = (DomainRdata) rData;
+                sb.append("NS\t")
+                        .append(domain.getRdata()).append("\t")
+                        .append(TTL).append("\t")
+                        .append(authFlag);
+                break;
+
+            default:
+                sb.append(TYPE.name()).append("\t")
+                        .append(domainName).append("\t")
+                        .append(TTL).append("\t")
+                        .append(authFlag);
+        }
+
+        return sb.toString();
+    }
 }

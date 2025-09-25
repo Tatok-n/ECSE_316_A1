@@ -1,7 +1,7 @@
 import java.util.List;
 
 public class MXRdata implements RData {
-    int preference; //unsigned 16 bit
+    int preference;
     List<DnsLabel> exchange;
 
     @Override

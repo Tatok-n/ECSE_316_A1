@@ -9,4 +9,9 @@ public class DnsLabel {
         this.length = length;
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
