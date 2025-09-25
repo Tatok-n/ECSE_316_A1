@@ -22,4 +22,17 @@ public enum DnsQueryType {
         }
         throw new IllegalArgumentException("Invalid RCode : "+ type);
     }
+
+    public static DnsQueryType fromName(String type) {
+        if (type.equals("A")) {
+            return A;}
+        else if (type.equals("NS")) {
+            return NS;
+        } else if (type.equals("MX")) {
+            return MX;
+        }
+        throw new IllegalArgumentException("Invalid RCode : "+ type);
+    }
+
+
 }
