@@ -1,6 +1,7 @@
 public enum DnsQueryType {
     A(0x0001), // IPv4 address
     NS(0x0002), // Name server
+    CName(0x0005), // Name server
     MX(0x000f); // Mail server
 
     public final int value;
@@ -11,5 +12,14 @@ public enum DnsQueryType {
 
     public int getValue() {
         return value;
+    }
+
+    public static DnsQueryType fromValue(int type) {
+        for (DnsQueryType qType : DnsQueryType.values()) {
+            if (qType.value == type) {
+                return qType;
+            }
+        }
+        throw new IllegalArgumentException("Invalid RCode : "+ type);
     }
 }
