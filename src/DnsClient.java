@@ -102,15 +102,20 @@ public class DnsClient {
     }
 
     private static void printAnswers(DnsRecord record) {
-        System.out.println("***Answer Section (" + record.getNumberOfAnswers() + " records)***");
-        for (DnsAnswer answer : record.getAnswers()) {
-            System.out.println(answer.toString(record.isAuth()));
-        }
-
-        if (record.getNumberOfAdditionalRecords() != 0) {
-            System.out.println("***Additional Section(" + record.getNumberOfAdditionalRecords() + " records)***");
-        } else {
+        int ansNb = record.getNumberOfAnswers();
+        int addAndNb = record.getNumberOfAdditionalRecords();
+        if (ansNb == 0 && addAndNb == 0) {
             System.out.println("NOTFOUND");
+            return;
+        }
+        if (ansNb > 0) {
+            System.out.println("***Answer Section (" + ansNb + " records)***");
+            for (DnsAnswer answer : record.getAnswers()) {
+                System.out.println(answer.toString(record.isAuth()));
+            }
+        }
+        if (addAndNb > 0) {
+            System.out.println("***Additional Section (" + addAndNb + " records)***");
         }
     }
 
