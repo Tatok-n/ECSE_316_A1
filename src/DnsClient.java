@@ -12,17 +12,18 @@ public class DnsClient {
      */
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            throw new IllegalArgumentException("Usage: java DnsClient <dns-server-ip> <domain-name> <query-type>");
+        if (args.length < 2 || args.length > 10) {
+            printUsageError();
         }
 
         try {
+            // Defaults
             int timeout = 5;
             int maxRetries = 3;
             int port = 53;
             DnsQueryType queryType = DnsQueryType.A;
-            byte[] serverIp;
-            String domainName;
+
+            // Parse optional flags
             int i = 0;
 
             while (i < args.length - 2) {
@@ -50,34 +51,54 @@ public class DnsClient {
 
             }
 
-            if (!(args[i].startsWith("@"))) {
-                throw new IllegalArgumentException("DNS server IP address must start with @ : " + args[i]);
+            // Validate trailing args
+            if (args.length - i != 2) {
+                printUsageError();
             }
 
-            serverIp = parseIp(args[i].substring(1));
-            domainName = args[i + 1];
+            String serverArg = args[args.length - 2];
+            String domainName = args[args.length - 1];
 
+            if (!serverArg.startsWith("@")) {
+                System.err.println("ERROR\tDNS server IP address must start with @ : " + serverArg);
+                System.exit(1);
+            }
+
+            byte[] serverIp = parseIp(serverArg.substring(1));
+
+            // Print request summary
             System.out.println("DnsClient sending request for " + domainName);
             System.out.println("Server : " + InetAddress.getByAddress(serverIp));
             System.out.println("Request type: " + queryType);
 
+            // Build request
             DnsRequestBuilder builder = new DnsRequestBuilder();
             byte[] requestPacket = builder.buildRequest(domainName, queryType);
 
+            // Send request & get response
             DnsSocket dnsSocket = new DnsSocket(serverIp, port, timeout, maxRetries);
 
             byte[] responsePacket = dnsSocket.query(requestPacket);
+
+            // Parse response
             DnsResponseParser parser = new DnsResponseParser(responsePacket);
             DnsRecord record = parser.parse();
 
             // Print answers
             printAnswers(record);
+
             dnsSocket.close();
 
         } catch (Exception e) {
-            System.err.println("ERROR " + e.getMessage());
+            System.err.println("ERROR\t" + e.getMessage());
             System.exit(99);
         }
+    }
+
+    private static void printUsageError() {
+        System.err.println("ERROR\tIncorrect input syntax");
+        System.err.println("Usage: java DnsClient [-t timeout] [-r max-retries] [-p port] [-mx|-ns] @server name");
+        System.exit(1);
     }
 
     private static byte[] parseIp(String ipStr) {
