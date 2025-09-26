@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DnsRecord {
-    // Datastructure to store and print received records
+    // Data structure to store and print received records
 
     // Header
     private int id;
@@ -15,6 +15,7 @@ public class DnsRecord {
     private int NSCOUNT;
     private int ARCOUNT;
 
+    //Records
     private List<DnsQuestion> questions = new ArrayList<>();
     private List<DnsRR> answers = new ArrayList<>();
     private List<DnsRR> additionalRecords = new ArrayList<>();

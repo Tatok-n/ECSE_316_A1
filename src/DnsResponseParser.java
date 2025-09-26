@@ -52,7 +52,7 @@ public class DnsResponseParser {
 
         position = 0;
 
-        // parse Header
+        // Parse header
         int id = ((packet[position] & 0xFF) << 8) | (packet[position + 1] & 0xFF);
         position += 2;
 
@@ -62,20 +62,17 @@ public class DnsResponseParser {
         OpCode opCode = new OpCode((codeInt & 0x8) != 0, (codeInt & 0x4) != 0, (codeInt & 0x2) != 0, (codeInt & 0x1) != 0);
         RCode rCode = RCode.fromValue(flags & 0xF);
 
+        // Handle non-zero rCodes
         if (rCode != RCode.NoError) {
             switch (rCode) {
                 case NameError:
-                    System.err.println("The domain name referenced in the query does not exist!");
-                    System.exit(1);
+                    throw new IllegalArgumentException("The domain name referenced in the query does not exist!");
                 case Refused:
                     throw new IllegalArgumentException("The name server refused to perform the operation!");
                 case NotImplemented:
                     throw new IllegalArgumentException("The name server does not support that kind of query!");
                 case ServerFailure:
                     throw new IllegalArgumentException("The name could not process the query due to a problem in the name server");
-                case NoError:
-                    break;
-
             }
 
         }
@@ -89,22 +86,23 @@ public class DnsResponseParser {
 
         record.setHeader(id, qr, opCode, rCode,qdCount,anCount,nsCount, arCount);
 
-        //Parse Question(s) should be 1
+        // Parse Question(s) should be 1
         parseQuestions(qdCount, record);
 
-        //Parse Answers
+        // Parse Answers
         List<DnsRR> answers = parseRRs(anCount);
         answers.forEach(record::addAnswer);
 
-        //Skip Authoritative Records
+        // Skip Authoritative Records
         skipAuthoritativeRecords(nsCount);
 
-        //Parse Additional Records
+        // Parse Additional Records
         List<DnsRR> additonalRecords = parseRRs(arCount);
         additonalRecords.forEach(record::addAdditionalRR);
         return record;
     }
 
+    // Reads but discards every record in the authoritative section
     private void skipAuthoritativeRecords(int nsCount) {
         for (int i = 0; i < nsCount; i++) {
             readName();
@@ -126,37 +124,52 @@ public class DnsResponseParser {
     private List<DnsRR> parseRRs(int recordCount) {
         List <DnsRR> records = new ArrayList<>();
         for (int i = 0; i < recordCount; i++) {
+
+            // Get label
             List<DnsLabel> labels = readName();
+
             int queryTypeInt = readUnsignedInt();
-            int queryClassInt = readUnsignedInt();
-            if (queryClassInt != 1) {
-                throw new IllegalArgumentException("queryClassInt must be 1, it was : " + queryClassInt);
+            int queryCode = readUnsignedInt();
+
+            // Ensure that the CODE section is equal to 1
+            if (queryCode != 1) {
+                throw new IllegalArgumentException("Query Class in the answer must be 1, it was : " + queryCode);
             }
+
+            // Parse TTL
             int higherTTLInt = readUnsignedInt();
             int lowerTTLInt = readUnsignedInt();
             long ttl = ((long) higherTTLInt << 16) | lowerTTLInt;
+
+            // Parse RData
             int rdLen = readUnsignedInt();
             DnsQueryType queryType = DnsQueryType.fromValue(queryTypeInt);
             RData rData;
+
             if (queryType == DnsQueryType.A) {
                 int higherIp = readUnsignedInt();
                 int lowerIp = readUnsignedInt();
                 int ip = (higherIp << 16) | lowerIp;
                 rData = new Ipv4Rdata(ip);
+
             } else if (queryType == DnsQueryType.AAAA) {
                 byte[] ipv6Bytes = new byte[16];
                 for (int j = 0; j < 16; j++) {
                     ipv6Bytes[j] = packet[position++];
                 }
                 rData = new Ipv6Rdata(ipv6Bytes);
+
             } else if (queryType == DnsQueryType.NS || queryType == DnsQueryType.CName) {
                 rData = new DomainRdata(readName());
+
             } else {
                 int preference = readUnsignedInt();
                 labels = readName();
                 rData = new MXRdata(preference,labels);
+
             }
-            DnsRR rr = new DnsRR(labels,queryType,queryClassInt, ttl, rdLen,rData );
+
+            DnsRR rr = new DnsRR(labels,queryType,queryCode, ttl, rdLen,rData );
             records.add(rr);
         }
         return records;

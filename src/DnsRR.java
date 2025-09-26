@@ -1,6 +1,7 @@
 import java.util.List;
 
 public class DnsRR {
+    // Data structure to store and display Record data, this could be an Answer or an additional record
 
     private List<DnsLabel> NAME;
     private DnsQueryType TYPE;

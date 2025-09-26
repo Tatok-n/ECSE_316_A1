@@ -1,7 +1,7 @@
 import java.util.List;
 
 public class DnsQuestion {
-    private List<DnsLabel> QName; // no specification on max length of QName
+    private List<DnsLabel> QName;
     private DnsQueryType qType;
     private int QCLASS = 0x0001;
 
