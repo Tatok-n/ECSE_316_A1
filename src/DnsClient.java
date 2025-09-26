@@ -57,7 +57,7 @@ public class DnsClient {
             serverIp = parseIp(args[i].substring(1));
             domainName = args[i + 1];
 
-            System.out.println("DnsClient sending request for : " + domainName);
+            System.out.println("DnsClient sending request for " + domainName);
             System.out.println("Server : " + InetAddress.getByAddress(serverIp));
             System.out.println("Request type: " + queryType);
 
@@ -102,7 +102,7 @@ public class DnsClient {
     }
 
     private static void printAnswers(DnsRecord record) {
-        System.out.println("***Answer Section(" + record.getNumberOfAnswers() + " records)***");
+        System.out.println("***Answer Section (" + record.getNumberOfAnswers() + " records)***");
         for (DnsAnswer answer : record.getAnswers()) {
             System.out.println(answer.toString(record.isAuth()));
         }
