@@ -57,10 +57,9 @@ public class DnsClient {
             serverIp = parseIp(args[i].substring(1));
             domainName = args[i + 1];
 
-            System.out.println("Server : " + InetAddress.getByAddress(serverIp));
             System.out.println("DnsClient sending request for : " + domainName);
+            System.out.println("Server : " + InetAddress.getByAddress(serverIp));
             System.out.println("Request type: " + queryType);
-
 
             DnsRequestBuilder builder = new DnsRequestBuilder();
             byte[] requestPacket = builder.buildRequest(domainName, queryType);
@@ -95,20 +94,21 @@ public class DnsClient {
                 }
                 addr[i] = (byte) val;
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid IPv4 address, strings are not allowed in an IPV4 address: " + ipStr);
+                throw new IllegalArgumentException(
+                        "Invalid IPv4 address, strings are not allowed in an IPV4 address: " + ipStr);
             }
         }
         return addr;
     }
 
     private static void printAnswers(DnsRecord record) {
-        System.out.println("***Answer Section("+ record.getNumberOfAnswers()+" records)***");
+        System.out.println("***Answer Section(" + record.getNumberOfAnswers() + " records)***");
         for (DnsAnswer answer : record.getAnswers()) {
             System.out.println(answer.toString(record.isAuth()));
         }
 
         if (record.getNumberOfAdditionalRecords() != 0) {
-            System.out.println("***Additional Section("+ record.getNumberOfAdditionalRecords()+" records)***");
+            System.out.println("***Additional Section(" + record.getNumberOfAdditionalRecords() + " records)***");
         } else {
             System.out.println("NOTFOUND");
         }
