@@ -51,7 +51,7 @@ public class DnsSocket {
             } catch (SocketTimeoutException e) {
                 attempts++;
                 if (attempts >= maxRetries) {
-                    throw new Exception("ERROR\tMaximum number of retries " + maxRetries + " exceeded");
+                    throw new Exception("Maximum number of retries " + maxRetries + " exceeded");
                 }
                 System.out.println("Timeout... retrying (" + attempts + ")");
             }
