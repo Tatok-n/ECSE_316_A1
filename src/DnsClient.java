@@ -116,7 +116,7 @@ public class DnsClient {
                 addr[i] = (byte) val;
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException(
-                        "Invalid IPv4 address, strings are not allowed in an IPV4 address: " + ipStr);
+                        "Invalid IPv4 address, characters are not allowed in an IPV4 address: " + ipStr);
             }
         }
         return addr;
