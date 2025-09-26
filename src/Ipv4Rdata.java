@@ -1,4 +1,4 @@
-public class IpRdata implements RData{
+public class Ipv4Rdata implements RData{
 
     int ip;
     @Override
@@ -10,7 +10,7 @@ public class IpRdata implements RData{
         return String.join(".", String.valueOf(b1), String.valueOf(b2), String.valueOf(b3), String.valueOf(b4));
     }
 
-    public IpRdata(int ip) {
+    public Ipv4Rdata(int ip) {
         this.ip = ip;
     }
 

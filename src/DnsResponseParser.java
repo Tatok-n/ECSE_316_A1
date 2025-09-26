@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DnsResponseParser {
@@ -62,6 +61,25 @@ public class DnsResponseParser {
         int codeInt =  ((flags >> 11) & 0xF);
         OpCode opCode = new OpCode((codeInt & 0x8) != 0, (codeInt & 0x4) != 0, (codeInt & 0x2) != 0, (codeInt & 0x1) != 0);
         RCode rCode = RCode.fromValue(flags & 0xF);
+
+        if (rCode != RCode.NoError) {
+            switch (rCode) {
+                case NameError:
+                    System.err.println("The domain name referenced in the query does not exist!");
+                    System.exit(1);
+                case Refused:
+                    throw new IllegalArgumentException("The name server refused to perform the operation!");
+                case NotImplemented:
+                    throw new IllegalArgumentException("The name server does not support that kind of query!");
+                case ServerFailure:
+                    throw new IllegalArgumentException("The name could not process the query due to a problem in the name server");
+                case NoError:
+                    break;
+
+            }
+
+        }
+
         position += 2;
 
         int qdCount = readUnsignedInt();
@@ -75,8 +93,28 @@ public class DnsResponseParser {
         parseQuestions(qdCount, record);
 
         //Parse Answers
-        parseAnswers(anCount, record);
+        List<DnsRR> answers = parseRRs(anCount);
+        answers.forEach(record::addAnswer);
+
+        //Skip Authoritative Records
+        skipAuthoritativeRecords(nsCount);
+
+        //Parse Additional Records
+        List<DnsRR> additonalRecords = parseRRs(arCount);
+        additonalRecords.forEach(record::addAdditionalRR);
         return record;
+    }
+
+    private void skipAuthoritativeRecords(int nsCount) {
+        for (int i = 0; i < nsCount; i++) {
+            readName();
+            readUnsignedInt();
+            readUnsignedInt();
+            readUnsignedInt();
+            readUnsignedInt();
+            int rdLen = readUnsignedInt();
+            position += rdLen;
+        }
     }
 
     private int readUnsignedInt() {
@@ -85,8 +123,9 @@ public class DnsResponseParser {
         return ((packet[initialPos] & 0xFF) << 8) | (packet[initialPos + 1] & 0xFF);
     }
 
-    private void parseAnswers(int anCount, DnsRecord record) {
-        for (int i = 0; i < anCount; i++) {
+    private List<DnsRR> parseRRs(int recordCount) {
+        List <DnsRR> records = new ArrayList<>();
+        for (int i = 0; i < recordCount; i++) {
             List<DnsLabel> labels = readName();
             int queryTypeInt = readUnsignedInt();
             int queryClassInt = readUnsignedInt();
@@ -103,7 +142,13 @@ public class DnsResponseParser {
                 int higherIp = readUnsignedInt();
                 int lowerIp = readUnsignedInt();
                 int ip = (higherIp << 16) | lowerIp;
-                rData = new IpRdata(ip);
+                rData = new Ipv4Rdata(ip);
+            } else if (queryType == DnsQueryType.AAAA) {
+                byte[] ipv6Bytes = new byte[16];
+                for (int j = 0; j < 16; j++) {
+                    ipv6Bytes[j] = packet[position++];
+                }
+                rData = new Ipv6Rdata(ipv6Bytes);
             } else if (queryType == DnsQueryType.NS || queryType == DnsQueryType.CName) {
                 rData = new DomainRdata(readName());
             } else {
@@ -111,8 +156,10 @@ public class DnsResponseParser {
                 labels = readName();
                 rData = new MXRdata(preference,labels);
             }
-            record.addAnswer(labels,queryType,queryClassInt, ttl, rdLen,rData );
+            DnsRR rr = new DnsRR(labels,queryType,queryClassInt, ttl, rdLen,rData );
+            records.add(rr);
         }
+        return records;
     }
 
     private void parseQuestions(int qdCount, DnsRecord record) {

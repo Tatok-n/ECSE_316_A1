@@ -90,6 +90,7 @@ public class DnsClient {
 
         } catch (Exception e) {
             System.err.println("ERROR\t" + e.getMessage());
+            e.printStackTrace();
             System.exit(99);
         }
     }
@@ -130,12 +131,15 @@ public class DnsClient {
         }
         if (ansNb > 0) {
             System.out.println("***Answer Section (" + ansNb + " records)***");
-            for (DnsAnswer answer : record.getAnswers()) {
+            for (DnsRR answer : record.getAnswers()) {
                 System.out.println(answer.toString(record.isAuth()));
             }
         }
         if (addAndNb > 0) {
             System.out.println("***Additional Section (" + addAndNb + " records)***");
+            for (DnsRR additonalRecord : record.getAdditionalRecords()) {
+                System.out.println(additonalRecord.toString(record.isAuth()));
+            }
         }
     }
 

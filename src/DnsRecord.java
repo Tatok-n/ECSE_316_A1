@@ -15,8 +15,9 @@ public class DnsRecord {
     private int NSCOUNT;
     private int ARCOUNT;
 
-    private List<DnsQuestion> questions = new ArrayList<DnsQuestion>();
-    private List<DnsAnswer> answers = new ArrayList<DnsAnswer>();
+    private List<DnsQuestion> questions = new ArrayList<>();
+    private List<DnsRR> answers = new ArrayList<>();
+    private List<DnsRR> additionalRecords = new ArrayList<>();
 
     public void setHeader(int id, boolean QR, OpCode opCode, RCode rCode, int qdCount,int anCount,int nsCount,int arCount ) {
         this.id = id;
@@ -46,13 +47,20 @@ public class DnsRecord {
         questions.add(question);
     }
 
-    public void addAnswer(List<DnsLabel> name, DnsQueryType type, int classParam, long ttl, int rdLength, RData rData) {
-        DnsAnswer answer = new DnsAnswer(name, type, classParam, ttl, rdLength, rData);
+    public void addAnswer(DnsRR answer) {
         answers.add(answer);
     }
 
-    public List<DnsAnswer> getAnswers() {
+    public void addAdditionalRR(DnsRR additionalRecord) {
+        additionalRecords.add(additionalRecord);
+    }
+
+    public List<DnsRR> getAnswers() {
         return answers;
+    }
+
+    public List<DnsRR> getAdditionalRecords() {
+        return additionalRecords;
     }
 
 }
