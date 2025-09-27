@@ -88,6 +88,9 @@ public class DnsClient {
 
             dnsSocket.close();
 
+        } catch (DnsNotFoundException e) {
+            System.out.println("NOTFOUND");
+            System.exit(0); // successfully not found
         } catch (Exception e) {
             System.err.println("ERROR\t" + e.getMessage());
             e.printStackTrace();
@@ -126,7 +129,7 @@ public class DnsClient {
         int ansNb = record.getNumberOfAnswers();
         int addAndNb = record.getNumberOfAdditionalRecords();
         if (ansNb == 0 && addAndNb == 0) {
-            System.out.println("NOTFOUND");
+            System.out.println("No data");
             return;
         }
         if (ansNb > 0) {

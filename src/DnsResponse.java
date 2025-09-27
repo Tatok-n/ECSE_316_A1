@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DnsResponse {
-    // Data structure to store and print received response
+    // Data structure to store and manipulate Dns responses
 
     // Header
     private int id;

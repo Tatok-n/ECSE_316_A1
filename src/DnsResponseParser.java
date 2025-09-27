@@ -67,7 +67,7 @@ public class DnsResponseParser {
         if (rCode != RCode.NoError) {
             switch (rCode) {
                 case NameError:
-                    throw new IllegalArgumentException("The domain name referenced in the query does not exist!");
+                    throw new DnsNotFoundException("The domain name referenced in the query does not exist!");
                 case Refused:
                     throw new IllegalArgumentException("The name server refused to perform the operation!");
                 case NotImplemented:
@@ -190,4 +190,5 @@ public class DnsResponseParser {
         }
 
     }
+
 }

@@ -1,6 +1,7 @@
 public enum RCode {
+    // record error codes
     NoError(0),
-    FormatError( 1),
+    FormatError(1),
     ServerFailure(2),
     NameError(3),
     NotImplemented(4),
@@ -18,6 +19,6 @@ public enum RCode {
                 return rc;
             }
         }
-        throw new IllegalArgumentException("Invalid RCode : "+ code);
+        throw new IllegalArgumentException("Invalid RCode : " + code);
     }
 }
