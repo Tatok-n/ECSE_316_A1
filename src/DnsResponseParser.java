@@ -17,7 +17,7 @@ public class DnsResponseParser {
         List<DnsLabel> labels = new ArrayList<>();
         boolean jumped = false;
         int jumpPos = -1;
-        while(true) {
+        while (true) {
             int len = packet[pos] & 0xFF;
             if (len == 0) {
                 pos++;
@@ -47,8 +47,8 @@ public class DnsResponseParser {
     }
 
     // Main parse method: parses entire response into DnsRecord objects
-    public DnsRecord parse() {
-        DnsRecord record = new DnsRecord();
+    public DnsResponse parse() {
+        DnsResponse record = new DnsResponse();
 
         position = 0;
 
@@ -58,8 +58,9 @@ public class DnsResponseParser {
 
         int flags = ((packet[position] & 0xFF) << 8) | (packet[position + 1] & 0xFF);
         boolean qr = ((flags >> 15) & 0x1) == 1;
-        int codeInt =  ((flags >> 11) & 0xF);
-        OpCode opCode = new OpCode((codeInt & 0x8) != 0, (codeInt & 0x4) != 0, (codeInt & 0x2) != 0, (codeInt & 0x1) != 0);
+        int codeInt = ((flags >> 11) & 0xF);
+        OpCode opCode = new OpCode((codeInt & 0x8) != 0, (codeInt & 0x4) != 0, (codeInt & 0x2) != 0,
+                (codeInt & 0x1) != 0);
         RCode rCode = RCode.fromValue(flags & 0xF);
 
         // Handle non-zero rCodes
@@ -72,7 +73,8 @@ public class DnsResponseParser {
                 case NotImplemented:
                     throw new IllegalArgumentException("The name server does not support that kind of query!");
                 case ServerFailure:
-                    throw new IllegalArgumentException("The name could not process the query due to a problem in the name server");
+                    throw new IllegalArgumentException(
+                            "The name could not process the query due to a problem in the name server");
             }
 
         }
@@ -84,20 +86,20 @@ public class DnsResponseParser {
         int nsCount = readUnsignedInt();
         int arCount = readUnsignedInt();
 
-        record.setHeader(id, qr, opCode, rCode,qdCount,anCount,nsCount, arCount);
+        record.setHeader(id, qr, opCode, rCode, qdCount, anCount, nsCount, arCount);
 
         // Parse Question(s) should be 1
         parseQuestions(qdCount, record);
 
         // Parse Answers
-        List<DnsRR> answers = parseRRs(anCount);
+        List<DnsResourceRecord> answers = parseRRs(anCount);
         answers.forEach(record::addAnswer);
 
         // Skip Authoritative Records
         skipAuthoritativeRecords(nsCount);
 
         // Parse Additional Records
-        List<DnsRR> additonalRecords = parseRRs(arCount);
+        List<DnsResourceRecord> additonalRecords = parseRRs(arCount);
         additonalRecords.forEach(record::addAdditionalRR);
         return record;
     }
@@ -121,8 +123,8 @@ public class DnsResponseParser {
         return ((packet[initialPos] & 0xFF) << 8) | (packet[initialPos + 1] & 0xFF);
     }
 
-    private List<DnsRR> parseRRs(int recordCount) {
-        List <DnsRR> records = new ArrayList<>();
+    private List<DnsResourceRecord> parseRRs(int recordCount) {
+        List<DnsResourceRecord> records = new ArrayList<>();
         for (int i = 0; i < recordCount; i++) {
 
             // Get label
@@ -165,17 +167,17 @@ public class DnsResponseParser {
             } else {
                 int preference = readUnsignedInt();
                 labels = readName();
-                rData = new MXRdata(preference,labels);
+                rData = new MXRdata(preference, labels);
 
             }
 
-            DnsRR rr = new DnsRR(labels,queryType,queryCode, ttl, rdLen,rData );
+            DnsResourceRecord rr = new DnsResourceRecord(labels, queryType, queryCode, ttl, rdLen, rData);
             records.add(rr);
         }
         return records;
     }
 
-    private void parseQuestions(int qdCount, DnsRecord record) {
+    private void parseQuestions(int qdCount, DnsResponse record) {
         for (int i = 0; i < qdCount; i++) {
             List<DnsLabel> labels = readName();
             int queryTypeInt = readUnsignedInt();
@@ -184,7 +186,7 @@ public class DnsResponseParser {
                 throw new IllegalArgumentException("queryClass must be 1, it was : " + queryClassInt);
             }
             DnsQueryType queryType = DnsQueryType.fromValue(queryTypeInt);
-            record.addQuestion(labels,queryType,0x0001);
+            record.addQuestion(labels, queryType, 0x0001);
         }
 
     }

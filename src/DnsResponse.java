@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class DnsRecord {
-    // Data structure to store and print received records
+public class DnsResponse {
+    // Data structure to store and print received response
 
     // Header
     private int id;
@@ -15,12 +15,13 @@ public class DnsRecord {
     private int NSCOUNT;
     private int ARCOUNT;
 
-    //Records
+    // Records
     private List<DnsQuestion> questions = new ArrayList<>();
-    private List<DnsRR> answers = new ArrayList<>();
-    private List<DnsRR> additionalRecords = new ArrayList<>();
+    private List<DnsResourceRecord> answers = new ArrayList<>();
+    private List<DnsResourceRecord> additionalRecords = new ArrayList<>();
 
-    public void setHeader(int id, boolean QR, OpCode opCode, RCode rCode, int qdCount,int anCount,int nsCount,int arCount ) {
+    public void setHeader(int id, boolean QR, OpCode opCode, RCode rCode, int qdCount, int anCount, int nsCount,
+            int arCount) {
         this.id = id;
         this.QR = QR;
         this.opCode = opCode;
@@ -48,19 +49,19 @@ public class DnsRecord {
         questions.add(question);
     }
 
-    public void addAnswer(DnsRR answer) {
+    public void addAnswer(DnsResourceRecord answer) {
         answers.add(answer);
     }
 
-    public void addAdditionalRR(DnsRR additionalRecord) {
+    public void addAdditionalRR(DnsResourceRecord additionalRecord) {
         additionalRecords.add(additionalRecord);
     }
 
-    public List<DnsRR> getAnswers() {
+    public List<DnsResourceRecord> getAnswers() {
         return answers;
     }
 
-    public List<DnsRR> getAdditionalRecords() {
+    public List<DnsResourceRecord> getAdditionalRecords() {
         return additionalRecords;
     }
 

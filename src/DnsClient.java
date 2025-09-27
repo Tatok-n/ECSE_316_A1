@@ -81,7 +81,7 @@ public class DnsClient {
 
             // Parse response
             DnsResponseParser parser = new DnsResponseParser(responsePacket);
-            DnsRecord record = parser.parse();
+            DnsResponse record = parser.parse();
 
             // Print answers
             printAnswers(record);
@@ -122,7 +122,7 @@ public class DnsClient {
         return addr;
     }
 
-    private static void printAnswers(DnsRecord record) {
+    private static void printAnswers(DnsResponse record) {
         int ansNb = record.getNumberOfAnswers();
         int addAndNb = record.getNumberOfAdditionalRecords();
         if (ansNb == 0 && addAndNb == 0) {
@@ -131,13 +131,13 @@ public class DnsClient {
         }
         if (ansNb > 0) {
             System.out.println("***Answer Section (" + ansNb + " records)***");
-            for (DnsRR answer : record.getAnswers()) {
+            for (DnsResourceRecord answer : record.getAnswers()) {
                 System.out.println(answer.toString(record.isAuth()));
             }
         }
         if (addAndNb > 0) {
             System.out.println("***Additional Section (" + addAndNb + " records)***");
-            for (DnsRR additonalRecord : record.getAdditionalRecords()) {
+            for (DnsResourceRecord additonalRecord : record.getAdditionalRecords()) {
                 System.out.println(additonalRecord.toString(record.isAuth()));
             }
         }
