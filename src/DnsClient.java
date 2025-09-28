@@ -141,8 +141,9 @@ public class DnsClient {
     private static void printAnswers(DnsResponse record) {
         int ansNb = record.getNumberOfAnswers();
         int addAndNb = record.getNumberOfAdditionalRecords();
+
         if (ansNb == 0 && addAndNb == 0) {
-            System.out.println("No data");
+            System.out.println("No Records");
             return;
         }
         if (ansNb > 0) {
