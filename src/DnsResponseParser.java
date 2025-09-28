@@ -48,7 +48,7 @@ public class DnsResponseParser {
 
     // Main parse method: parses entire response into DnsRecord objects
     public DnsResponse parse() {
-        DnsResponse record = new DnsResponse();
+        DnsResponse response = new DnsResponse();
 
         position = 0;
 
@@ -86,22 +86,22 @@ public class DnsResponseParser {
         int nsCount = readUnsignedInt();
         int arCount = readUnsignedInt();
 
-        record.setHeader(id, qr, opCode, rCode, qdCount, anCount, nsCount, arCount);
+        response.setHeader(id, qr, opCode, rCode, qdCount, anCount, nsCount, arCount);
 
         // Parse Question(s) should be 1
-        parseQuestions(qdCount, record);
+        parseQuestions(qdCount, response);
 
         // Parse Answers
         List<DnsResourceRecord> answers = parseRRs(anCount);
-        answers.forEach(record::addAnswer);
+        answers.forEach(response::addAnswer);
 
         // Skip Authoritative Records
         skipAuthoritativeRecords(nsCount);
 
         // Parse Additional Records
         List<DnsResourceRecord> additonalRecords = parseRRs(arCount);
-        additonalRecords.forEach(record::addAdditionalRR);
-        return record;
+        additonalRecords.forEach(response::addAdditionalRR);
+        return response;
     }
 
     // Reads but discards every record in the authoritative section
