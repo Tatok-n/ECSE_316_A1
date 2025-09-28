@@ -131,11 +131,11 @@ public class DnsResponseParser {
             List<DnsLabel> labels = readName();
 
             int queryTypeInt = readUnsignedInt();
-            int queryCode = readUnsignedInt();
+            int queryClass = readUnsignedInt();
 
-            // Ensure that the CODE section is equal to 1
-            if (queryCode != 1) {
-                throw new IllegalArgumentException("Query Class in the answer must be 1, it was : " + queryCode);
+            // Ensure that the CLASS section is equal to 1
+            if (queryClass != 1) {
+                throw new IllegalArgumentException("Query Class in the answer must be 1, it was : " + queryClass);
             }
 
             // Parse TTL
@@ -171,7 +171,7 @@ public class DnsResponseParser {
 
             }
 
-            DnsResourceRecord rr = new DnsResourceRecord(labels, queryType, queryCode, ttl, rdLen, rData);
+            DnsResourceRecord rr = new DnsResourceRecord(labels, queryType, queryClass, ttl, rdLen, rData);
             records.add(rr);
         }
         return records;
