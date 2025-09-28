@@ -56,4 +56,64 @@ public class DnsRequestBuilder {
         return Arrays.copyOf(buffer.array(), buffer.position());
     }
 
+    public boolean validateRequest(byte[] request, String domainName, DnsQueryType reqType) {
+        // min length: 12 bytes for header + domain length (assuming ascii
+        // chars) + QTYPE + QCLASS
+        if (request.length < 12 + domainName.length() + 2 + 2)
+            return false;
+
+        ByteBuffer buffer = ByteBuffer.wrap(request);
+
+        // --- HEADER ---
+        short id = buffer.getShort(); // ID, any value is fine
+        short flags = buffer.getShort();
+        if ((flags & 0x0100) == 0)
+            return false; // RD bit should always be 1
+        short qdCount = buffer.getShort();
+        if (qdCount != 1)
+            return false;
+        short anCount = buffer.getShort();
+        if (anCount != 0)
+            return false;
+        short nsCount = buffer.getShort();
+        if (nsCount != 0)
+            return false;
+        short arCount = buffer.getShort();
+        if (arCount != 0)
+            return false;
+
+        // --- QUESTION SECTION ---
+
+        // Validate QNAME byte-by-byte
+        int startPos = buffer.position();
+        int maxPos = request.length - 4; // leave 4 bytes for QTYPE + QCLASS
+        String[] labels = domainName.split("\\.");
+        for (String label : labels) {
+            if (buffer.position() >= maxPos)
+                return false; // overflow
+            byte len = buffer.get();
+            if (len != label.length())
+                return false;
+            for (char c : label.toCharArray()) {
+                if (buffer.get() != (byte) c)
+                    return false;
+            }
+        }
+        byte end = buffer.get();
+        if (end != 0)
+            return false; // QNAME must end with 0
+
+        // Validate QTYPE
+        short qType = buffer.getShort();
+        if (qType != reqType.value)
+            return false;
+
+        // Validate QCLASS
+        short qClass = buffer.getShort();
+        if (qClass != 0x0001) // always use 1
+            return false;
+
+        return true; // all checks passed
+    }
+
 }

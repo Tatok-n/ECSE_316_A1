@@ -46,9 +46,9 @@ public class DnsClient {
                     } else {
                         printUsageError();
                     }
-            }
+                }
             } catch (NumberFormatException e) {
-               printNumberFormatError(args[i-1], args[i]);
+                printNumberFormatError(args[i - 1], args[i]);
             }
 
             // Validate trailing args
@@ -71,21 +71,27 @@ public class DnsClient {
             System.out.println("Server : " + InetAddress.getByAddress(serverIp));
             System.out.println("Request type: " + queryType);
 
+            // Open socket
+            DnsSocket dnsSocket = new DnsSocket(serverIp, port, timeout, maxRetries);
+
             // Build request
             DnsRequestBuilder builder = new DnsRequestBuilder();
             byte[] requestPacket = builder.buildRequest(domainName, queryType);
 
-            // Send request & get response
-            DnsSocket dnsSocket = new DnsSocket(serverIp, port, timeout, maxRetries);
+            // only send if valid request
+            if (builder.validateRequest(requestPacket, domainName, queryType)) {
+                // Send request & get response
+                byte[] responsePacket = dnsSocket.query(requestPacket);
 
-            byte[] responsePacket = dnsSocket.query(requestPacket);
+                // Parse response
+                DnsResponseParser parser = new DnsResponseParser(responsePacket);
+                DnsResponse record = parser.parse();
 
-            // Parse response
-            DnsResponseParser parser = new DnsResponseParser(responsePacket);
-            DnsResponse record = parser.parse();
-
-            // Print answers
-            printAnswers(record);
+                // Print answers
+                printAnswers(record);
+            } else {
+                System.out.println("Invalid Request Format");
+            }
 
             dnsSocket.close();
 
@@ -106,7 +112,8 @@ public class DnsClient {
 
     private static void printNumberFormatError(String arg, String value) {
         System.err.println("ERROR\tIncorrect input syntax");
-        System.err.println("ERROR\tIncorrect input format : " + arg + " was expected to be an integer but was : " + value+".");
+        System.err.println(
+                "ERROR\tIncorrect input format : " + arg + " was expected to be an integer but was : " + value + ".");
         System.exit(1);
     }
 
