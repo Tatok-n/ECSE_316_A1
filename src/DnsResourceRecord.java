@@ -23,11 +23,6 @@ public class DnsResourceRecord {
 
     public String toString(boolean auth) {
         StringBuilder sb = new StringBuilder();
-        String domainName = NAME.stream()
-                .map(label -> label.name)
-                .reduce((a, b) -> a + "." + b)
-                .orElse("");
-
         String authFlag = auth ? "nonauth" : "auth";
 
         // Handle MX
@@ -42,7 +37,7 @@ public class DnsResourceRecord {
             sb.append(DnsQueryType.toString(TYPE)).append("\t").append(rData.getRdata()).append("\t").append(TTL)
                     .append("\t").append(authFlag);
         } else {
-            sb.append(DnsQueryType.toString(TYPE)).append("\t").append(domainName).append("\t").append(TTL).append("\t")
+            sb.append(DnsQueryType.toString(TYPE)).append("\t").append(rData.getRdata()).append("\t").append(TTL).append("\t")
                     .append(authFlag);
         }
 

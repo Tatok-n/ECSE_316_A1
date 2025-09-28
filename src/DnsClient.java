@@ -25,29 +25,30 @@ public class DnsClient {
             // Parse optional flags
             int i = 0;
 
-            while (i < args.length - 2) {
-                String arg = args[i];
-                switch (arg) {
-                    case "-t":
+            try {
+                while (i < args.length - 2) {
+                    String arg = args[i];
+                    if (arg.equals("-t")) {
                         timeout = Integer.parseInt(args[++i]);
-                        break;
-                    case "-r":
+                        i++;
+                    } else if (arg.equals("-r")) {
                         maxRetries = Integer.parseInt(args[++i]);
-                        break;
-                    case "-p":
+                        i++;
+                    } else if (arg.equals("-p")) {
                         port = Integer.parseInt(args[++i]);
-                        break;
-                    case "-mx":
+                        i++;
+                    } else if (arg.equals("-mx") && queryType == DnsQueryType.A) {
                         queryType = DnsQueryType.MX;
-                        break;
-                    case "-ns":
+                        i++;
+                    } else if (arg.equals("-ns") && queryType == DnsQueryType.A) {
                         queryType = DnsQueryType.NS;
-                        break;
-                    default:
-                        break;
-                }
-                i++;
-
+                        i++;
+                    } else {
+                        printUsageError();
+                    }
+            }
+            } catch (NumberFormatException e) {
+               printNumberFormatError(args[i-1], args[i]);
             }
 
             // Validate trailing args
@@ -93,7 +94,6 @@ public class DnsClient {
             System.exit(0); // successfully not found
         } catch (Exception e) {
             System.err.println("ERROR\t" + e.getMessage());
-            e.printStackTrace();
             System.exit(99);
         }
     }
@@ -101,6 +101,12 @@ public class DnsClient {
     private static void printUsageError() {
         System.err.println("ERROR\tIncorrect input syntax");
         System.err.println("Usage: java DnsClient [-t timeout] [-r max-retries] [-p port] [-mx|-ns] @server name");
+        System.exit(1);
+    }
+
+    private static void printNumberFormatError(String arg, String value) {
+        System.err.println("ERROR\tIncorrect input syntax");
+        System.err.println("ERROR\tIncorrect input format : " + arg + " was expected to be an integer but was : " + value+".");
         System.exit(1);
     }
 
