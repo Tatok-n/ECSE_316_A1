@@ -143,7 +143,7 @@ public class DnsClient {
         int addAndNb = record.getNumberOfAdditionalRecords();
 
         if (ansNb == 0 && addAndNb == 0) {
-            System.out.println("No Records");
+            System.out.println("NOT FOUND");
             return;
         }
         if (ansNb > 0) {
