@@ -9,6 +9,8 @@ Implemented by: **Mathis Bélanger (261049961) & Tarek Namani (261085655)**
 
 ### Compile
 
+Requirement: **Java 21 (LTS)**
+
 From the project root:
 
 ```bash
